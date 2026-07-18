@@ -1,0 +1,102 @@
+[33mcommit 61aeeaf434ecca0e4875c21b5231405c1e07a88a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmaster[m[33m)[m
+Author: yugggfr <6969yugverma@gmail.com>
+Date:   Sat Jul 18 20:47:07 2026 +0530
+
+    Remove .env and venv from tracking
+
+ .env                                               |     3 [31m-[m
+ Procfile                                           |     1 [32m+[m
+ .../site-packages/PyNaCl-1.5.0.dist-info/INSTALLER |     1 [31m-[m
+ .../site-packages/PyNaCl-1.5.0.dist-info/LICENSE   |   174 [31m-[m
+ .../site-packages/PyNaCl-1.5.0.dist-info/METADATA  |   246 [31m-[m
+ .../site-packages/PyNaCl-1.5.0.dist-info/RECORD    |    68 [31m-[m
+ .../Lib/site-packages/PyNaCl-1.5.0.dist-info/WHEEL |     5 [31m-[m
+ .../PyNaCl-1.5.0.dist-info/top_level.txt           |     2 [31m-[m
+ .../__pycache__/typing_extensions.cpython-310.pyc  |   Bin [31m117330[m -> [32m0[m bytes
+ .../_cffi_backend.cp310-win_amd64.pyd              |   Bin [31m179712[m -> [32m0[m bytes
+ venv/Lib/site-packages/_distutils_hack/__init__.py |   222 [31m-[m
+ .../__pycache__/__init__.cpython-310.pyc           |   Bin [31m7552[m -> [32m0[m bytes
+ .../__pycache__/override.cpython-310.pyc           |   Bin [31m205[m -> [32m0[m bytes
+ venv/Lib/site-packages/_distutils_hack/override.py |     1 [31m-[m
+ .../aiohappyeyeballs-2.7.1.dist-info/INSTALLER     |     1 [31m-[m
+ .../aiohappyeyeballs-2.7.1.dist-info/METADATA      |   124 [31m-[m
+ .../aiohappyeyeballs-2.7.1.dist-info/RECORD        |    16 [31m-[m
+ .../aiohappyeyeballs-2.7.1.dist-info/WHEEL         |     4 [31m-[m
+ .../licenses/LICENSE                               |   279 [31m-[m
+ .../Lib/site-packages/aiohappyeyeballs/__init__.py |    14 [31m-[m
+ .../__pycache__/__init__.cpython-310.pyc           |   Bin [31m455[m -> [32m0[m bytes
+ .../__pycache__/_staggered.cpython-310.pyc         |   Bin [31m5454[m -> [32m0[m bytes
+ .../__pycache__/impl.cpython-310.pyc               |   Bin [31m6212[m -> [32m0[m bytes
+ .../__pycache__/types.cpython-310.pyc              |   Bin [31m403[m -> [32m0[m bytes
+ .../__pycache__/utils.cpython-310.pyc              |   Bin [31m2544[m -> [32m0[m bytes
+ .../site-packages/aiohappyeyeballs/_staggered.py   |   197 [31m-[m
+ venv/Lib/site-packages/aiohappyeyeballs/impl.py    |   247 [31m-[m
+ venv/Lib/site-packages/aiohappyeyeballs/py.typed   |     0
+ venv/Lib/site-packages/aiohappyeyeballs/types.py   |    14 [31m-[m
+ venv/Lib/site-packages/aiohappyeyeballs/utils.py   |    82 [31m-[m
+ .../aiohttp-3.14.1.dist-info/INSTALLER             |     1 [31m-[m
+ .../aiohttp-3.14.1.dist-info/METADATA              |   257 [31m-[m
+ .../site-packages/aiohttp-3.14.1.dist-info/RECORD  |   138 [31m-[m
+ .../site-packages/aiohttp-3.14.1.dist-info/WHEEL   |     5 [31m-[m
+ .../aiohttp-3.14.1.dist-info/licenses/LICENSE.txt  |   201 [31m-[m
+ .../licenses/vendor/llhttp/LICENSE                 |    22 [31m-[m
+ .../aiohttp-3.14.1.dist-info/top_level.txt         |     1 [31m-[m
+ .../site-packages/aiohttp/.hash/_cparser.pxd.hash  |     1 [31m-[m
+ .../aiohttp/.hash/_find_header.pxd.hash            |     1 [31m-[m
+ .../aiohttp/.hash/_http_parser.pyx.hash            |     1 [31m-[m
+ .../aiohttp/.hash/_http_writer.pyx.hash            |     1 [31m-[m
+ venv/Lib/site-packages/aiohttp/.hash/hdrs.py.hash  |     1 [31m-[m
+ venv/Lib/site-packages/aiohttp/__init__.py         |   279 [31m-[m
+ .../aiohttp/__pycache__/__init__.cpython-310.pyc   |   Bin [31m4933[m -> [32m0[m bytes
+ .../__pycache__/_cookie_helpers.cpython-310.pyc    |   Bin [31m8578[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/abc.cpython-310.pyc        |   Bin [31m11168[m -> [32m0[m bytes
+ .../__pycache__/base_protocol.cpython-310.pyc      |   Bin [31m3650[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/client.cpython-310.pyc     |   Bin [31m38992[m -> [32m0[m bytes
+ .../__pycache__/client_exceptions.cpython-310.pyc  |   Bin [31m13368[m -> [32m0[m bytes
+ .../client_middleware_digest_auth.cpython-310.pyc  |   Bin [31m11695[m -> [32m0[m bytes
+ .../__pycache__/client_middlewares.cpython-310.pyc |   Bin [31m1781[m -> [32m0[m bytes
+ .../__pycache__/client_proto.cpython-310.pyc       |   Bin [31m8674[m -> [32m0[m bytes
+ .../__pycache__/client_reqrep.cpython-310.pyc      |   Bin [31m40081[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/client_ws.cpython-310.pyc  |   Bin [31m15801[m -> [32m0[m bytes
+ .../__pycache__/compression_utils.cpython-310.pyc  |   Bin [31m14532[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/connector.cpython-310.pyc  |   Bin [31m46428[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/cookiejar.cpython-310.pyc  |   Bin [31m17449[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/formdata.cpython-310.pyc   |   Bin [31m4836[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/hdrs.cpython-310.pyc       |   Bin [31m5439[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/helpers.cpython-310.pyc    |   Bin [31m31131[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/http.cpython-310.pyc       |   Bin [31m1541[m -> [32m0[m bytes
+ .../__pycache__/http_exceptions.cpython-310.pyc    |   Bin [31m4994[m -> [32m0[m bytes
+ .../__pycache__/http_parser.cpython-310.pyc        |   Bin [31m24223[m -> [32m0[m bytes
+ .../__pycache__/http_websocket.cpython-310.pyc     |   Bin [31m892[m -> [32m0[m bytes
+ .../__pycache__/http_writer.cpython-310.pyc        |   Bin [31m8703[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/log.cpython-310.pyc        |   Bin [31m426[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/multipart.cpython-310.pyc  |   Bin [31m33615[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/payload.cpython-310.pyc    |   Bin [31m36307[m -> [32m0[m bytes
+ .../__pycache__/payload_streamer.cpython-310.pyc   |   Bin [31m3470[m -> [32m0[m bytes
+ .../__pycache__/pytest_plugin.cpython-310.pyc      |   Bin [31m11723[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/resolver.cpython-310.pyc   |   Bin [31m6606[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/streams.cpython-310.pyc    |   Bin [31m20432[m -> [32m0[m bytes
+ .../__pycache__/tcp_helpers.cpython-310.pyc        |   Bin [31m1115[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/test_utils.cpython-310.pyc |   Bin [31m24303[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/tracing.cpython-310.pyc    |   Bin [31m13641[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/typedefs.cpython-310.pyc   |   Bin [31m1822[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/web.cpython-310.pyc        |   Bin [31m10835[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/web_app.cpython-310.pyc    |   Bin [31m17364[m -> [32m0[m bytes
+ .../__pycache__/web_exceptions.cpython-310.pyc     |   Bin [31m11658[m -> [32m0[m bytes
+ .../__pycache__/web_fileresponse.cpython-310.pyc   |   Bin [31m9385[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/web_log.cpython-310.pyc    |   Bin [31m8205[m -> [32m0[m bytes
+ .../__pycache__/web_middlewares.cpython-310.pyc    |   Bin [31m3809[m -> [32m0[m bytes
+ .../__pycache__/web_protocol.cpython-310.pyc       |   Bin [31m19668[m -> [32m0[m bytes
+ .../__pycache__/web_request.cpython-310.pyc        |   Bin [31m26060[m -> [32m0[m bytes
+ .../__pycache__/web_response.cpython-310.pyc       |   Bin [31m23973[m -> [32m0[m bytes
+ .../__pycache__/web_routedef.cpython-310.pyc       |   Bin [31m7603[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/web_runner.cpython-310.pyc |   Bin [31m12730[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/web_server.cpython-310.pyc |   Bin [31m3678[m -> [32m0[m bytes
+ .../__pycache__/web_urldispatcher.cpython-310.pyc  |   Bin [31m43410[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/web_ws.cpython-310.pyc     |   Bin [31m21246[m -> [32m0[m bytes
+ .../aiohttp/__pycache__/worker.cpython-310.pyc     |   Bin [31m6666[m -> [32m0[m bytes
+ venv/Lib/site-packages/aiohttp/_cookie_helpers.py  |   361 [31m-[m
+ venv/Lib/site-packages/aiohttp/_cparser.pxd        |   159 [31m-[m
+ venv/Lib/site-packages/aiohttp/_find_header.pxd    |     2 [31m-[m
+ venv/Lib/site-packages/aiohttp/_headers.pxi        |    83 [31m-[m
+ .../aiohttp/_http_parser.cp310-win
