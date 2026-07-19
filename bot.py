@@ -47,12 +47,16 @@ if COOKIES_ENV_VALUE:
         f.write(COOKIES_ENV_VALUE)
     log.info("Loaded YouTube cookies from YTDLP_COOKIES env var")
 
+DOWNLOAD_DIR = "/tmp/lunbot_downloads"
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
 YTDL_OPTIONS = {
     "format": "bestaudio/best",
     "noplaylist": True,
     "quiet": True,
     "default_search": "ytsearch",
     "source_address": "0.0.0.0",  # avoids IPv6 issues on some hosts
+    "outtmpl": os.path.join(DOWNLOAD_DIR, "%(id)s.%(ext)s"),
 }
 
 if COOKIES_ENV_VALUE:
@@ -61,26 +65,20 @@ if COOKIES_ENV_VALUE:
 ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
 
-async def search_audio(query: str):
-    """Runs yt-dlp's (blocking) extract_info in a thread and returns (stream_url, title, headers)."""
+async def download_audio(query: str):
+    """Downloads the audio via yt-dlp itself (not just extracting a URL for ffmpeg to
+    fetch separately) — this avoids 403s that happen when the signed stream URL is
+    IP-locked to a different outbound IP than the one ffmpeg would use on cloud hosts."""
     loop = asyncio.get_event_loop()
-    data = await loop.run_in_executor(
-        None, lambda: ytdl.extract_info(f"ytsearch:{query}", download=False)
-    )
-    if "entries" in data:
-        data = data["entries"][0]
-    headers = data.get("http_headers", {})
-    return data["url"], data.get("title", "Unknown title"), headers
 
+    def _download():
+        info = ytdl.extract_info(f"ytsearch:{query}", download=True)
+        if "entries" in info:
+            info = info["entries"][0]
+        filepath = ytdl.prepare_filename(info)
+        return filepath, info.get("title", "Unknown title")
 
-def build_ffmpeg_options(headers: dict) -> dict:
-    """Builds FFmpeg options with the HTTP headers yt-dlp says this stream needs —
-    googlevideo URLs often serve silently-empty audio without matching headers."""
-    header_str = "".join(f"{k}: {v}\r\n" for k, v in headers.items())
-    before_options = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
-    if header_str:
-        before_options = f'-headers "{header_str}" {before_options}'
-    return {"before_options": before_options, "options": "-vn"}
+    return await loop.run_in_executor(None, _download)
 
 
 # ---------------------------------------------------------------------------
@@ -174,21 +172,24 @@ async def lun_play(ctx: commands.Context, *, query: str):
 
     async with ctx.typing():
         try:
-            stream_url, title, headers = await search_audio(query)
+            filepath, title = await download_audio(query)
 
-            # Re-check right before playing — the search above can take a few
+            # Re-check right before playing — the download above can take a few
             # seconds, enough for a flaky voice connection to have dropped.
             vc = await ensure_connected(channel)
 
             if vc.is_playing() or vc.is_paused():
                 vc.stop()
 
-            def after_playback(error):
+            def after_playback(error, path=filepath):
                 if error:
                     log.error("Playback error: %s", error)
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
 
-            ffmpeg_options = build_ffmpeg_options(headers)
-            source = discord.FFmpegPCMAudio(stream_url, stderr=sys.stdout, **ffmpeg_options)
+            source = discord.FFmpegPCMAudio(filepath, stderr=sys.stdout, options="-vn")
             vc.play(source, after=after_playback)
         except Exception as e:
             log.error("lun_play failed: %s", e, exc_info=True)
