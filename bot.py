@@ -142,20 +142,20 @@ async def lun_play(ctx: commands.Context, *, query: str):
     async with ctx.typing():
         try:
             stream_url, title = await search_audio(query)
+
+            if vc.is_playing() or vc.is_paused():
+                vc.stop()
+
+            def after_playback(error):
+                if error:
+                    log.error("Playback error: %s", error)
+
+            source = discord.FFmpegPCMAudio(stream_url, **FFMPEG_OPTIONS)
+            vc.play(source, after=after_playback)
         except Exception as e:
-            log.error("yt-dlp search failed: %s", e)
-            await ctx.send("Couldn't find or play that. Try a different search.")
+            log.error("lun_play failed: %s", e, exc_info=True)
+            await ctx.send(f"Something went wrong trying to play that: `{e}`")
             return
-
-        if vc.is_playing() or vc.is_paused():
-            vc.stop()
-
-        def after_playback(error):
-            if error:
-                log.error("Playback error: %s", error)
-
-        source = discord.FFmpegPCMAudio(stream_url, **FFMPEG_OPTIONS)
-        vc.play(source, after=after_playback)
 
     await ctx.send(f"Now playing: **{title}**")
 
