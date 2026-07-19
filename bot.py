@@ -38,6 +38,14 @@ target_channels: dict[int, int] = {}
 # ---------------------------------------------------------------------------
 # Music (yt-dlp + ffmpeg)
 # ---------------------------------------------------------------------------
+COOKIES_ENV_VALUE = os.getenv("YTDLP_COOKIES")
+COOKIES_FILE_PATH = "/tmp/youtube_cookies.txt"
+
+if COOKIES_ENV_VALUE:
+    with open(COOKIES_FILE_PATH, "w", encoding="utf-8") as f:
+        f.write(COOKIES_ENV_VALUE)
+    log.info("Loaded YouTube cookies from YTDLP_COOKIES env var")
+
 YTDL_OPTIONS = {
     "format": "bestaudio/best",
     "noplaylist": True,
@@ -46,6 +54,9 @@ YTDL_OPTIONS = {
     "source_address": "0.0.0.0",  # avoids IPv6 issues on some hosts
     "extractor_args": {"youtube": {"player_client": ["android"]}},
 }
+
+if COOKIES_ENV_VALUE:
+    YTDL_OPTIONS["cookiefile"] = COOKIES_FILE_PATH
 
 FFMPEG_OPTIONS = {
     "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
