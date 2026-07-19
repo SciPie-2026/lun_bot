@@ -57,23 +57,29 @@ YTDL_OPTIONS = {
 if COOKIES_ENV_VALUE:
     YTDL_OPTIONS["cookiefile"] = COOKIES_FILE_PATH
 
-FFMPEG_OPTIONS = {
-    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
-    "options": "-vn",
-}
-
 ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
 
 
 async def search_audio(query: str):
-    """Runs yt-dlp's (blocking) extract_info in a thread and returns (stream_url, title)."""
+    """Runs yt-dlp's (blocking) extract_info in a thread and returns (stream_url, title, headers)."""
     loop = asyncio.get_event_loop()
     data = await loop.run_in_executor(
         None, lambda: ytdl.extract_info(f"ytsearch:{query}", download=False)
     )
     if "entries" in data:
         data = data["entries"][0]
-    return data["url"], data.get("title", "Unknown title")
+    headers = data.get("http_headers", {})
+    return data["url"], data.get("title", "Unknown title"), headers
+
+
+def build_ffmpeg_options(headers: dict) -> dict:
+    """Builds FFmpeg options with the HTTP headers yt-dlp says this stream needs —
+    googlevideo URLs often serve silently-empty audio without matching headers."""
+    header_str = "".join(f"{k}: {v}\r\n" for k, v in headers.items())
+    before_options = "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
+    if header_str:
+        before_options = f'-headers "{header_str}" {before_options}'
+    return {"before_options": before_options, "options": "-vn"}
 
 
 # ---------------------------------------------------------------------------
@@ -96,7 +102,7 @@ async def join_voice_channel(guild: discord.Guild):
         return  # already connected
 
     try:
-        await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
+        await ensure_connected(channel)
         log.info("Joined voice channel: %s (%s)", channel.name, guild.name)
     except Exception as e:
         log.error("Failed to join voice channel: %s", e)
@@ -167,7 +173,7 @@ async def lun_play(ctx: commands.Context, *, query: str):
 
     async with ctx.typing():
         try:
-            stream_url, title = await search_audio(query)
+            stream_url, title, headers = await search_audio(query)
 
             # Re-check right before playing — the search above can take a few
             # seconds, enough for a flaky voice connection to have dropped.
@@ -180,7 +186,8 @@ async def lun_play(ctx: commands.Context, *, query: str):
                 if error:
                     log.error("Playback error: %s", error)
 
-            source = discord.FFmpegPCMAudio(stream_url, **FFMPEG_OPTIONS)
+            ffmpeg_options = build_ffmpeg_options(headers)
+            source = discord.FFmpegPCMAudio(stream_url, **ffmpeg_options)
             vc.play(source, after=after_playback)
         except Exception as e:
             log.error("lun_play failed: %s", e, exc_info=True)
