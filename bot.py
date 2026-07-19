@@ -51,7 +51,7 @@ DOWNLOAD_DIR = "/tmp/lunbot_downloads"
 os.makedirs(DOWNLOAD_DIR, exist_ok=True)
 
 YTDL_OPTIONS = {
-    "format": "worstaudio/worst",
+    "format": "worstaudio",
     "noplaylist": True,
     "quiet": True,
     "default_search": "ytsearch",
