@@ -44,6 +44,7 @@ YTDL_OPTIONS = {
     "quiet": True,
     "default_search": "ytsearch",
     "source_address": "0.0.0.0",  # avoids IPv6 issues on some hosts
+    "extractor_args": {"youtube": {"player_client": ["android"]}},
 }
 
 FFMPEG_OPTIONS = {
