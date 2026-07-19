@@ -140,19 +140,26 @@ async def lun_join(ctx: commands.Context):
 @bot.command(name="lun_play")
 async def lun_play(ctx: commands.Context, *, query: str):
     """Searches YouTube for `query` and plays the audio in your voice channel."""
-    vc = ctx.guild.voice_client
+    if ctx.author.voice is None or ctx.author.voice.channel is None:
+        await ctx.send("Join a voice channel first.")
+        return
+    channel = ctx.author.voice.channel
 
+    vc = ctx.guild.voice_client
     if vc is None or not vc.is_connected():
-        if ctx.author.voice is None or ctx.author.voice.channel is None:
-            await ctx.send("Join a voice channel first.")
-            return
-        channel = ctx.author.voice.channel
         vc = await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
         target_channels[ctx.guild.id] = channel.id
 
     async with ctx.typing():
         try:
             stream_url, title = await search_audio(query)
+
+            # Re-check right before playing — the search above can take a few
+            # seconds, enough for a flaky voice connection to have dropped.
+            vc = ctx.guild.voice_client
+            if vc is None or not vc.is_connected():
+                vc = await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
+                target_channels[ctx.guild.id] = channel.id
 
             if vc.is_playing() or vc.is_paused():
                 vc.stop()
