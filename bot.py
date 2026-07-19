@@ -1,4 +1,5 @@
 import os
+import sys
 import asyncio
 import logging
 
@@ -187,7 +188,7 @@ async def lun_play(ctx: commands.Context, *, query: str):
                     log.error("Playback error: %s", error)
 
             ffmpeg_options = build_ffmpeg_options(headers)
-            source = discord.FFmpegPCMAudio(stream_url, **ffmpeg_options)
+            source = discord.FFmpegPCMAudio(stream_url, stderr=sys.stdout, **ffmpeg_options)
             vc.play(source, after=after_playback)
         except Exception as e:
             log.error("lun_play failed: %s", e, exc_info=True)
