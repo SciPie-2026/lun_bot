@@ -137,6 +137,24 @@ async def lun_join(ctx: commands.Context):
     await ctx.send(f"Joined **{channel.name}** and will stay connected.")
 
 
+async def ensure_connected(channel: discord.VoiceChannel):
+    """Returns a live, connected VoiceClient for this channel's guild —
+    cleaning up any stale/dead connection object first if needed."""
+    vc = channel.guild.voice_client
+    if vc is not None and not vc.is_connected():
+        try:
+            await vc.disconnect(force=True)
+        except Exception:
+            pass
+        vc = None
+
+    if vc is None:
+        vc = await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
+        target_channels[channel.guild.id] = channel.id
+
+    return vc
+
+
 @bot.command(name="lun_play")
 async def lun_play(ctx: commands.Context, *, query: str):
     """Searches YouTube for `query` and plays the audio in your voice channel."""
@@ -145,10 +163,7 @@ async def lun_play(ctx: commands.Context, *, query: str):
         return
     channel = ctx.author.voice.channel
 
-    vc = ctx.guild.voice_client
-    if vc is None or not vc.is_connected():
-        vc = await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
-        target_channels[ctx.guild.id] = channel.id
+    vc = await ensure_connected(channel)
 
     async with ctx.typing():
         try:
@@ -156,10 +171,7 @@ async def lun_play(ctx: commands.Context, *, query: str):
 
             # Re-check right before playing — the search above can take a few
             # seconds, enough for a flaky voice connection to have dropped.
-            vc = ctx.guild.voice_client
-            if vc is None or not vc.is_connected():
-                vc = await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
-                target_channels[ctx.guild.id] = channel.id
+            vc = await ensure_connected(channel)
 
             if vc.is_playing() or vc.is_paused():
                 vc.stop()
