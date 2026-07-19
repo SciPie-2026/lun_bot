@@ -5,6 +5,7 @@ import logging
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+import yt_dlp
 
 # ---------------------------------------------------------------------------
 # Config
@@ -33,6 +34,35 @@ bot = commands.Bot(command_prefix=COMMAND_PREFIX, intents=intents)
 # Tracks which channel we're supposed to be keeping alive, per guild.
 # { guild_id: voice_channel_id }
 target_channels: dict[int, int] = {}
+
+# ---------------------------------------------------------------------------
+# Music (yt-dlp + ffmpeg)
+# ---------------------------------------------------------------------------
+YTDL_OPTIONS = {
+    "format": "bestaudio/best",
+    "noplaylist": True,
+    "quiet": True,
+    "default_search": "ytsearch",
+    "source_address": "0.0.0.0",  # avoids IPv6 issues on some hosts
+}
+
+FFMPEG_OPTIONS = {
+    "before_options": "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+    "options": "-vn",
+}
+
+ytdl = yt_dlp.YoutubeDL(YTDL_OPTIONS)
+
+
+async def search_audio(query: str):
+    """Runs yt-dlp's (blocking) extract_info in a thread and returns (stream_url, title)."""
+    loop = asyncio.get_event_loop()
+    data = await loop.run_in_executor(
+        None, lambda: ytdl.extract_info(f"ytsearch:{query}", download=False)
+    )
+    if "entries" in data:
+        data = data["entries"][0]
+    return data["url"], data.get("title", "Unknown title")
 
 
 # ---------------------------------------------------------------------------
@@ -94,6 +124,51 @@ async def lun_join(ctx: commands.Context):
 
     await join_voice_channel(ctx.guild)
     await ctx.send(f"Joined **{channel.name}** and will stay connected.")
+
+
+@bot.command(name="lun_play")
+async def lun_play(ctx: commands.Context, *, query: str):
+    """Searches YouTube for `query` and plays the audio in your voice channel."""
+    vc = ctx.guild.voice_client
+
+    if vc is None or not vc.is_connected():
+        if ctx.author.voice is None or ctx.author.voice.channel is None:
+            await ctx.send("Join a voice channel first.")
+            return
+        channel = ctx.author.voice.channel
+        vc = await channel.connect(reconnect=True, self_mute=False, self_deaf=False)
+        target_channels[ctx.guild.id] = channel.id
+
+    async with ctx.typing():
+        try:
+            stream_url, title = await search_audio(query)
+        except Exception as e:
+            log.error("yt-dlp search failed: %s", e)
+            await ctx.send("Couldn't find or play that. Try a different search.")
+            return
+
+        if vc.is_playing() or vc.is_paused():
+            vc.stop()
+
+        def after_playback(error):
+            if error:
+                log.error("Playback error: %s", error)
+
+        source = discord.FFmpegPCMAudio(stream_url, **FFMPEG_OPTIONS)
+        vc.play(source, after=after_playback)
+
+    await ctx.send(f"Now playing: **{title}**")
+
+
+@bot.command(name="lun_stop")
+async def lun_stop(ctx: commands.Context):
+    """Stops whatever is currently playing (bot stays in the voice channel)."""
+    vc = ctx.guild.voice_client
+    if vc is not None and (vc.is_playing() or vc.is_paused()):
+        vc.stop()
+        await ctx.send("Stopped playback.")
+    else:
+        await ctx.send("Nothing is playing.")
 
 
 @bot.command(name="lun_leave")
